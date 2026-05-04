@@ -1,18 +1,24 @@
 import yfinance as yf
+import pandas as pd
 
 def get_ema_signal(symbol):
     try:
-        data = yf.download(symbol + ".NS", period="2mo", interval="1d", progress=False)
+        df = yf.download(symbol + ".NS", period="2mo", interval="1d", progress=False)
 
-        if data.empty or len(data) < 21:
+        if df.empty or len(df) < 21:
             return None
 
-        data["EMA21"] = data["Close"].ewm(span=21, adjust=False).mean()
+        # Ensure clean dataframe
+        df = df[['Close']].dropna()
 
-        latest = data.iloc[-1]
+        # Calculate EMA
+        df['EMA21'] = df['Close'].ewm(span=21, adjust=False).mean()
 
-        close = latest["Close"]
-        ema = latest["EMA21"]
+        # Get last row safely
+        latest = df.iloc[-1]
+
+        close = float(latest['Close'])
+        ema = float(latest['EMA21'])
 
         return {
             "symbol": symbol,
