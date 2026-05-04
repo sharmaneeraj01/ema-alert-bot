@@ -1,5 +1,6 @@
 from data import get_ema_signal
 from telegram import send_to_telegram
+from tabulate import tabulate
 
 def load_watchlist():
     with open("watchlist.txt") as f:
@@ -7,7 +8,7 @@ def load_watchlist():
 
 def run():
     stocks = load_watchlist()
-    alerts = []
+    rows = []
 
     for stock in stocks:
         result = get_ema_signal(stock)
@@ -16,14 +17,28 @@ def run():
             continue
 
         if result["breakdown"]:
-            alerts.append(
-                f"{stock} ❌ Close:{result['close']} < EMA21:{result['ema']}"
-            )
+            rows.append([
+                stock,
+                result["close"],
+                result["ema"],
+                "❌ Breakdown"
+            ])
 
-    if alerts:
-        message = "🚨 *EMA 21 Breakdown Alert*\n\n" + "\n".join(alerts)
-    else:
-        message = "✅ No stocks below EMA21 today"
+if rows:
+    table = tabulate(
+        rows,
+        headers=["Stock", "Close", "EMA21", "Signal"],
+        tablefmt="github"
+    )
+
+    message = (
+        "🚨 *EMA 21 Breakdown Alert*\n\n"
+        "```\n"
+        f"{table}\n"
+        "```"
+    )
+else:
+    message = "✅ No EMA breakdown signals today"
 
     print(message)
     send_to_telegram(message)
