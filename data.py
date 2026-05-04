@@ -15,16 +15,25 @@ def get_ema_signal(symbol):
         df['EMA21'] = df['Close'].ewm(span=21, adjust=False).mean()
 
         # Get last row safely
-        latest = df.iloc[-1]
+        # Get last two rows
+        today = df.iloc[-1]
+        yesterday = df.iloc[-2]
 
-        close = float(latest['Close'])
-        ema = float(latest['EMA21'])
+        # Extract values safely
+        today_close = float(today['Close'].item())
+        today_ema = float(today['EMA21'].item())
+
+        yest_close = float(yesterday['Close'].item())
+        yest_ema = float(yesterday['EMA21'].item())
+
+        # EVENT: crossed below EMA
+        breakdown = (yest_close > yest_ema) and (today_close < today_ema)
 
         return {
             "symbol": symbol,
-            "close": round(close, 2),
-            "ema": round(ema, 2),
-            "below": close < ema
+            "close": round(today_close, 2),
+            "ema": round(today_ema, 2),
+            "breakdown": breakdown
         }
 
     except Exception as e:
