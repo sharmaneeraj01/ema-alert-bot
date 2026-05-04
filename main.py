@@ -8,7 +8,8 @@ def load_watchlist():
 
 def run():
     stocks = load_watchlist()
-    rows = []
+
+    rows = []   # ✅ MUST be here (inside run, before loop)
 
     for stock in stocks:
         result = get_ema_signal(stock)
@@ -24,21 +25,22 @@ def run():
                 "❌ Breakdown"
             ])
 
-if rows:
-    table = tabulate(
-        rows,
-        headers=["Stock", "Close", "EMA21", "Signal"],
-        tablefmt="github"
-    )
+    # AFTER loop
+    if rows:
+        table = tabulate(
+            rows,
+            headers=["Stock", "Close", "EMA21", "Signal"],
+            tablefmt="github"
+        )
 
-    message = (
-        "🚨 *EMA 21 Breakdown Alert*\n\n"
-        "```\n"
-        f"{table}\n"
-        "```"
-    )
-else:
-    message = "✅ No EMA breakdown signals today"
+        message = (
+            "🚨 *EMA 21 Breakdown Alert*\n\n"
+            "```\n"
+            f"{table}\n"
+            "```"
+        )
+    else:
+        message = "✅ No EMA breakdown signals today"
 
     print(message)
     send_to_telegram(message)
