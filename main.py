@@ -15,7 +15,7 @@ def run():
         if not result:
             continue
 
-        if result["below"]:
+        if result["breakdown"]:
             alerts.append(
                 f"{stock} ❌ Close:{result['close']} < EMA21:{result['ema']}"
             )
